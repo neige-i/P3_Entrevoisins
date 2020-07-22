@@ -25,8 +25,12 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
 
     private final List<Neighbour> mNeighbours;
 
-    public MyNeighbourRecyclerViewAdapter(List<Neighbour> items) {
+    /** Callback to handle the click on the RecyclerView's item inside a fragment or activity */
+    private final ItemListener mItemListener;
+
+    public MyNeighbourRecyclerViewAdapter(List<Neighbour> items, ItemListener itemListener) {
         mNeighbours = items;
+        mItemListener = itemListener;
     }
 
     @Override
@@ -51,6 +55,8 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
                 EventBus.getDefault().post(new DeleteNeighbourEvent(neighbour));
             }
         });
+
+        holder.itemView.setOnClickListener(view -> mItemListener.onItemClickListener(position));
     }
 
     @Override
@@ -70,5 +76,9 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
             super(view);
             ButterKnife.bind(this, view);
         }
+    }
+
+    public interface ItemListener {
+        void onItemClickListener(int position);
     }
 }
