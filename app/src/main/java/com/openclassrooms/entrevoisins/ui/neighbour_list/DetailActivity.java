@@ -2,6 +2,7 @@ package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
@@ -12,10 +13,13 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.openclassrooms.entrevoisins.R;
+import com.openclassrooms.entrevoisins.di.DI;
 import com.openclassrooms.entrevoisins.model.Neighbour;
+import com.openclassrooms.entrevoisins.service.NeighbourApiService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -33,8 +37,13 @@ public class DetailActivity extends AppCompatActivity {
     TextView mWebsite;
     @BindView(R.id.aboutMeContent)
     TextView mAboutMe;
+    @BindView(R.id.favourite)
+    FloatingActionButton mFavourite;
 
     private static final String NEIGHBOUR_EXTRA = "NEIGHBOUR_EXTRA";
+
+    private NeighbourApiService mApiService;
+    private Neighbour mNeighbour;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +53,10 @@ public class DetailActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Neighbour neighbour = (Neighbour) getIntent().getSerializableExtra(NEIGHBOUR_EXTRA);
-        setTitle(neighbour.getName());
-        init(neighbour);
+        mApiService = DI.getNeighbourApiService();
+
+        mNeighbour = (Neighbour) getIntent().getSerializableExtra(NEIGHBOUR_EXTRA);
+        initUi();
     }
 
     @Override
@@ -60,14 +70,24 @@ public class DetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void init(Neighbour neighbour) {
+    private void initUi() {
+        setTitle(mNeighbour.getName());
+
         Glide.with(this)
-                .load(neighbour.getAvatarUrl())
+                .load(mNeighbour.getAvatarUrl())
                 .into(mAvatar);
-        mName.setText(neighbour.getName());
-        mAddress.setText(neighbour.getAddress());
-        mPhoneNumber.setText(neighbour.getPhoneNumber());
-        mAboutMe.setText(neighbour.getAboutMe());
+        mName.setText(mNeighbour.getName());
+        mAddress.setText(mNeighbour.getAddress());
+        mPhoneNumber.setText(mNeighbour.getPhoneNumber());
+        mWebsite.setText(mNeighbour.getWebsiteUrl());
+        mAboutMe.setText(mNeighbour.getAboutMe());
+        mFavourite.setImageResource(mNeighbour.isFavourite() ? R.drawable.ic_star_white_24dp : R.drawable.ic_star_border_white_24dp);
+    }
+
+    @OnClick(R.id.favourite)
+    void setFavourite() {
+        mFavourite.setImageResource(mNeighbour.isFavourite() ? R.drawable.ic_star_border_white_24dp : R.drawable.ic_star_white_24dp);
+        mApiService.toggleFavourite(mNeighbour);
     }
 
     /** Used to navigate to this activity */

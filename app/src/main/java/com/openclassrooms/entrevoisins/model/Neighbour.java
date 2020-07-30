@@ -1,6 +1,7 @@
 package com.openclassrooms.entrevoisins.model;
 
 import java.io.Serializable;
+import java.text.Normalizer;
 import java.util.Objects;
 
 /**
@@ -23,8 +24,14 @@ public class Neighbour implements Serializable {
     /** Phone number */
     private String phoneNumber;
 
+    /** Website */
+    private String websiteUrl;
+
     /** About me */
     private String aboutMe;
+
+    /** Favourite or not */
+    private boolean isFavourite;
 
     /**
      * Constructor
@@ -39,7 +46,20 @@ public class Neighbour implements Serializable {
         this.avatarUrl = avatarUrl;
         this.address = address;
         this.phoneNumber = phoneNumber;
+        this.websiteUrl = generateWebsiteFromName(name);
         this.aboutMe = aboutMe;
+        this.isFavourite = false;
+    }
+
+    public Neighbour(Neighbour neighbour) {
+        this.id = neighbour.id;
+        this.name = neighbour.name;
+        this.avatarUrl = neighbour.avatarUrl;
+        this.address = neighbour.address;
+        this.phoneNumber = neighbour.phoneNumber;
+        this.websiteUrl = neighbour.websiteUrl;
+        this.aboutMe = neighbour.aboutMe;
+        this.isFavourite = neighbour.isFavourite;
     }
 
     public long getId() {
@@ -82,12 +102,43 @@ public class Neighbour implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getWebsiteUrl() {
+        return websiteUrl;
+    }
+
+    public void setWebsiteUrl(String websiteUrl) {
+        this.websiteUrl = websiteUrl;
+    }
+
     public String getAboutMe() {
         return aboutMe;
     }
 
     public void setAboutMe(String aboutMe) {
         this.aboutMe = aboutMe;
+    }
+
+    public boolean isFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(boolean favourite) {
+        isFavourite = favourite;
+    }
+
+    /**
+     * Generates the facebook website address according to the neighbour's {@link #name}.
+     * <br />It removes all the accents from the name and makes it all in lowercase before adding it
+     * to the beginning of the facebook website URL.
+     *
+     * @param name Name that is used to determine the end of the facebook website URL
+     * @return  The complete facebook website address
+     */
+    private String generateWebsiteFromName(String name) {
+        String nameUrl = Normalizer.normalize(name, Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "")
+                .toLowerCase();
+        return "www.facebook.com/" + nameUrl;
     }
 
     @Override
@@ -101,5 +152,10 @@ public class Neighbour implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "{" + name + ", " + isFavourite + '}';
     }
 }

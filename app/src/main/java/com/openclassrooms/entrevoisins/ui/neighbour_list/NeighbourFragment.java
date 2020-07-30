@@ -13,28 +13,61 @@ import android.view.ViewGroup;
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
 import com.openclassrooms.entrevoisins.events.DeleteNeighbourEvent;
+import com.openclassrooms.entrevoisins.events.ShowNeighbourDetailEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 
+public class NeighbourFragment extends Fragment {
 
-public class NeighbourFragment extends Fragment implements MyNeighbourRecyclerViewAdapter.ItemListener {
+    /**
+     * Position in the ViewPager of the fragment displaying all the neighbours.
+     * <br />It must be used as the argument when calling {@link #newInstance(int)}
+     */
+    public static final int ALL_NEIGHBOURS = 0;
+    /**
+     * Position in the ViewPager of the fragment displaying only the favourite neighbours.
+     * <br />It must be used as the argument when calling {@link #newInstance(int)}
+     */
+    public static final int FAVOURITE_NEIGHBOURS = 1;
+    /**
+     * Key to set and retrieve the kind of neighbours this fragment will display.
+     */
+    private static final String NEIGHBOUR_PARAM = "NEIGHBOUR_PARAM";
+    /**
+     * Static list containing all the instances of this class. This is used to access other instances
+     * from another one. Here, the favourite list inside the {@link #FAVOURITE_NEIGHBOURS} fragment
+     * can be updated from the {@link #ALL_NEIGHBOURS} fragment.
+     */
+    private static List<NeighbourFragment> FRAGMENT_LIST = new ArrayList<>();
+
+    /**
+     * Represents which neighbours to display in the {@link RecyclerView}.
+     * It equals to either {@link #ALL_NEIGHBOURS} or {@link #FAVOURITE_NEIGHBOURS}.
+     */
+    private int mWhichNeighbours;
 
     private NeighbourApiService mApiService;
     private List<Neighbour> mNeighbours;
     private RecyclerView mRecyclerView;
 
-
     /**
      * Create and return a new instance
+     * @param whichNeighbours Kind of neighbours to display.
+     *                        Must be either {@link #ALL_NEIGHBOURS} or {@link #FAVOURITE_NEIGHBOURS}
      * @return @{@link NeighbourFragment}
      */
-    public static NeighbourFragment newInstance() {
+    public static NeighbourFragment newInstance(int whichNeighbours) {
         NeighbourFragment fragment = new NeighbourFragment();
+        Bundle args = new Bundle();
+        args.putInt(NEIGHBOUR_PARAM, whichNeighbours);
+        fragment.setArguments(args);
+        FRAGMENT_LIST.add(fragment);
         return fragment;
     }
 
@@ -42,6 +75,7 @@ public class NeighbourFragment extends Fragment implements MyNeighbourRecyclerVi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mApiService = DI.getNeighbourApiService();
+        mWhichNeighbours = getArguments() != null ? getArguments().getInt(NEIGHBOUR_PARAM) : ALL_NEIGHBOURS;
     }
 
     @Override
@@ -59,8 +93,11 @@ public class NeighbourFragment extends Fragment implements MyNeighbourRecyclerVi
      * Init the List of neighbours
      */
     private void initList() {
-        mNeighbours = mApiService.getNeighbours();
-        mRecyclerView.setAdapter(new MyNeighbourRecyclerViewAdapter(mNeighbours, this));
+        switch (mWhichNeighbours) {
+            case ALL_NEIGHBOURS:        mNeighbours = mApiService.getNeighbours();      break;
+            case FAVOURITE_NEIGHBOURS:  mNeighbours = mApiService.getFavNeighbours();   break;
+        }
+        mRecyclerView.setAdapter(new MyNeighbourRecyclerViewAdapter(mNeighbours));
     }
 
     @Override
@@ -70,15 +107,19 @@ public class NeighbourFragment extends Fragment implements MyNeighbourRecyclerVi
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        EventBus.getDefault().unregister(this);
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        // Lifecycle of a fragment inside a ViewPager can be tricky as it is not necessarily
+        // destroyed if it is not visible anymore. Here, this fragment is used in both pages of the
+        // ViewPager's adapter. Thus, if the fragments (un)register an EventBus in onStart() and
+        // onStop(), when the user clicks on a Neighbour (which fires an event), then the
+        // @Subscribe method is called twice as both fragments are aware of the event. This is why
+        // the EventBus is (un)registered when the fragment becomes (in)visible to the user.
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            EventBus.getDefault().register(this);
+        } else {
+            EventBus.getDefault().unregister(this);
+        }
     }
 
     /**
@@ -87,12 +128,24 @@ public class NeighbourFragment extends Fragment implements MyNeighbourRecyclerVi
      */
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
-        mApiService.deleteNeighbour(event.neighbour);
+        switch (mWhichNeighbours) {
+            case ALL_NEIGHBOURS:
+                mApiService.deleteNeighbour(event.neighbour);
+                FRAGMENT_LIST.get(FAVOURITE_NEIGHBOURS).initList();
+                break;
+            case FAVOURITE_NEIGHBOURS:
+                mApiService.toggleFavourite(event.neighbour);
+                break;
+        }
         initList();
     }
 
-    @Override
-    public void onItemClickListener(int position) {
-        DetailActivity.navigate(getActivity(), mNeighbours.get(position));
+    /**
+     * Fired if the user clicks on a RecyclerView item
+     * @param event
+     */
+    @Subscribe
+    public void onShowNeighbourDetail(ShowNeighbourDetailEvent event) {
+        DetailActivity.navigate(getActivity(), event.neighbour);
     }
 }

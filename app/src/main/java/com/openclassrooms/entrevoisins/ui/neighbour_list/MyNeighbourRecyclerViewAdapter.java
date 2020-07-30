@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.events.DeleteNeighbourEvent;
+import com.openclassrooms.entrevoisins.events.ShowNeighbourDetailEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 
 import org.greenrobot.eventbus.EventBus;
@@ -25,12 +26,8 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
 
     private final List<Neighbour> mNeighbours;
 
-    /** Callback to handle the click on the RecyclerView's item inside a fragment or activity */
-    private final ItemListener mItemListener;
-
-    public MyNeighbourRecyclerViewAdapter(List<Neighbour> items, ItemListener itemListener) {
+    public MyNeighbourRecyclerViewAdapter(List<Neighbour> items) {
         mNeighbours = items;
-        mItemListener = itemListener;
     }
 
     @Override
@@ -49,14 +46,8 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.mNeighbourAvatar);
 
-        holder.mDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EventBus.getDefault().post(new DeleteNeighbourEvent(neighbour));
-            }
-        });
-
-        holder.itemView.setOnClickListener(view -> mItemListener.onItemClickListener(position));
+        holder.mDeleteButton.setOnClickListener(v -> EventBus.getDefault().post(new DeleteNeighbourEvent(neighbour)));
+        holder.itemView.setOnClickListener(view -> EventBus.getDefault().post(new ShowNeighbourDetailEvent(neighbour)));
     }
 
     @Override
@@ -76,9 +67,5 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
             super(view);
             ButterKnife.bind(this, view);
         }
-    }
-
-    public interface ItemListener {
-        void onItemClickListener(int position);
     }
 }
