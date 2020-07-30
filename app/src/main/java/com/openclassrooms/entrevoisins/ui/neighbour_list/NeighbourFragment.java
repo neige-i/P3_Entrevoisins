@@ -1,14 +1,13 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
@@ -22,6 +21,9 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class NeighbourFragment extends Fragment {
 
@@ -54,7 +56,11 @@ public class NeighbourFragment extends Fragment {
 
     private NeighbourApiService mApiService;
     private List<Neighbour> mNeighbours;
-    private RecyclerView mRecyclerView;
+
+    @BindView(R.id.list_neighbours)
+    RecyclerView mRecyclerView;
+    @BindView(R.id.no_favourite)
+    TextView mNoFavouriteText;
 
     /**
      * Create and return a new instance
@@ -82,9 +88,7 @@ public class NeighbourFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
-        Context context = view.getContext();
-        mRecyclerView = (RecyclerView) view;
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        ButterKnife.bind(this, view);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         return view;
     }
@@ -98,6 +102,15 @@ public class NeighbourFragment extends Fragment {
             case FAVOURITE_NEIGHBOURS:  mNeighbours = mApiService.getFavNeighbours();   break;
         }
         mRecyclerView.setAdapter(new MyNeighbourRecyclerViewAdapter(mNeighbours));
+        updateTextVisibility();
+    }
+
+    /**
+     * Shows a short text to the user if there isn't any favourite neighbour
+     */
+    private void updateTextVisibility() {
+        if (mWhichNeighbours == FAVOURITE_NEIGHBOURS)
+            mNoFavouriteText.setVisibility(mRecyclerView.getAdapter().getItemCount() == 0 ? View.VISIBLE : View.GONE);
     }
 
     @Override
