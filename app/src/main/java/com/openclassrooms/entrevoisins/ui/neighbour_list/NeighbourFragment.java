@@ -1,6 +1,8 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
@@ -57,6 +59,9 @@ public class NeighbourFragment extends Fragment {
     private NeighbourApiService mApiService;
     private List<Neighbour> mNeighbours;
 
+    @VisibleForTesting
+    private CountingIdlingResource mCountingIdlingResource;
+
     @BindView(R.id.list_neighbours)
     RecyclerView mRecyclerView;
     @BindView(R.id.no_favourite)
@@ -90,6 +95,8 @@ public class NeighbourFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
         ButterKnife.bind(this, view);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+
+        mCountingIdlingResource = new CountingIdlingResource("RecyclerView refresh");
         return view;
     }
 
@@ -150,7 +157,9 @@ public class NeighbourFragment extends Fragment {
                 mApiService.toggleFavourite(event.neighbour);
                 break;
         }
+        mCountingIdlingResource.increment();
         initList();
+        mCountingIdlingResource.decrement();
     }
 
     /**
@@ -160,5 +169,9 @@ public class NeighbourFragment extends Fragment {
     @Subscribe
     public void onShowNeighbourDetail(ShowNeighbourDetailEvent event) {
         DetailActivity.navigate(getActivity(), event.neighbour);
+    }
+
+    public CountingIdlingResource getCountingIdlingResource() {
+        return mCountingIdlingResource;
     }
 }

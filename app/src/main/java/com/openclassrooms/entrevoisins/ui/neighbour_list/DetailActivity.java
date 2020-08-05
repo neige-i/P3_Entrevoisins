@@ -86,7 +86,9 @@ public class DetailActivity extends AppCompatActivity {
 
     @OnClick(R.id.favourite)
     void setFavourite() {
-        mFavourite.setImageResource(mNeighbour.isFavourite() ? R.drawable.ic_star_border_white_24dp : R.drawable.ic_star_white_24dp);
+        int imageResourceId = mNeighbour.isFavourite() ? R.drawable.ic_star_border_white_24dp : R.drawable.ic_star_white_24dp;
+        mFavourite.setImageResource(imageResourceId);
+        mFavourite.setTag(imageResourceId);
         mApiService.toggleFavourite(mNeighbour);
     }
 
