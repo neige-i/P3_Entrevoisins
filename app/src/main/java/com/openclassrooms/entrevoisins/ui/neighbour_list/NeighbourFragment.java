@@ -43,12 +43,12 @@ public class NeighbourFragment extends Fragment {
      * Key to set and retrieve the kind of neighbours this fragment will display.
      */
     private static final String NEIGHBOUR_PARAM = "NEIGHBOUR_PARAM";
-    /**
-     * Static list containing all the instances of this class. This is used to access other instances
-     * from another one. Here, the favourite list inside the {@link #FAVOURITE_NEIGHBOURS} fragment
-     * can be updated from the {@link #ALL_NEIGHBOURS} fragment.
-     */
-    private static List<NeighbourFragment> FRAGMENT_LIST = new ArrayList<>();
+//    /**
+//     * Static list containing all the instances of this class. This is used to access other instances
+//     * from another one. Here, the favourite list inside the {@link #FAVOURITE_NEIGHBOURS} fragment
+//     * can be updated from the {@link #ALL_NEIGHBOURS} fragment.
+//     */
+//    private static List<NeighbourFragment> FRAGMENT_LIST = new ArrayList<>();
 
     /**
      * Represents which neighbours to display in the {@link RecyclerView}.
@@ -78,7 +78,7 @@ public class NeighbourFragment extends Fragment {
         Bundle args = new Bundle();
         args.putInt(NEIGHBOUR_PARAM, whichNeighbours);
         fragment.setArguments(args);
-        FRAGMENT_LIST.add(fragment);
+//        FRAGMENT_LIST.add(fragment);
         return fragment;
     }
 
@@ -148,18 +148,19 @@ public class NeighbourFragment extends Fragment {
      */
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
-        switch (mWhichNeighbours) {
-            case ALL_NEIGHBOURS:
-                mApiService.deleteNeighbour(event.neighbour);
-                FRAGMENT_LIST.get(FAVOURITE_NEIGHBOURS).initList();
-                break;
-            case FAVOURITE_NEIGHBOURS:
-                mApiService.toggleFavourite(event.neighbour);
-                break;
-        }
-        mCountingIdlingResource.increment();
-        initList();
-        mCountingIdlingResource.decrement();
+        System.out.println("onDeleteNeighbour " + mWhichNeighbours);
+//        switch (mWhichNeighbours) {
+//            case ALL_NEIGHBOURS:
+//                mApiService.deleteNeighbour(event.neighbour);
+////                FRAGMENT_LIST.get(FAVOURITE_NEIGHBOURS).initList();
+//                break;
+//            case FAVOURITE_NEIGHBOURS:
+//                mApiService.toggleFavourite(event.neighbour);
+//                break;
+//        }
+//        mCountingIdlingResource.increment();
+//        initList();
+//        mCountingIdlingResource.decrement();
     }
 
     /**
@@ -168,6 +169,7 @@ public class NeighbourFragment extends Fragment {
      */
     @Subscribe
     public void onShowNeighbourDetail(ShowNeighbourDetailEvent event) {
+        System.out.println("onShowNeighbourDetail " + mWhichNeighbours);
         DetailActivity.navigate(getActivity(), event.neighbour);
     }
 

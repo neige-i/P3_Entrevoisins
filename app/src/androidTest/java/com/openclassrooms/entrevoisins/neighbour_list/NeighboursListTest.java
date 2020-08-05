@@ -71,11 +71,6 @@ public class NeighboursListTest {
         assertThat(mActivity, notNullValue());
     }
 
-    @After
-    public void tearDown() {
-
-    }
-
     /**
      * We ensure that our recyclerview is displaying at least on item
      */
@@ -96,12 +91,6 @@ public class NeighboursListTest {
         onRecyclerViewInteraction().perform(RecyclerViewActions.actionOnItemAtPosition(1, new DeleteViewAction()));
         // Then : the number of element is 11
         onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT-1));
-
-        // TODO: how to avoid undoing things when all tests are running one after the other
-        onView(withId(R.id.add_neighbour)).perform(click());
-        onView(withId(R.id.name)).perform(typeText(" "), closeSoftKeyboard());
-        onView(withId(R.id.create)).perform(click());
-        onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT));
     }
 
     @Test
@@ -128,13 +117,11 @@ public class NeighboursListTest {
 
         setFavourite(true);
         onRecyclerViewInteraction().check(withItemCount(none + 1));
-        setFavourite(false); // TODO: how to avoid undoing things when all tests are running one after the other
     }
 
     @Test
     public void myFavouriteList_deleteAction_shouldRemoveItem() {
         int favItemCount = 1;
-        // Given : We remove the element at position 2
         onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT));
 
         setFavourite(true);
@@ -143,11 +130,9 @@ public class NeighboursListTest {
         // When perform a click on a delete icon
 //        mIdlingResource = ((NeighbourFragment) mActivity.getSupportFragmentManager().getFragments().get(1)).getCountingIdlingResource();
 //        IdlingRegistry.getInstance().register(mIdlingResource);
-//        System.out.println("mIdlingResource=" + mIdlingResource);
         onRecyclerViewInteraction().perform(RecyclerViewActions.actionOnItemAtPosition(0, new DeleteViewAction()));
         setFavourite(false);
-//        setFavourite();
-        // Then : the number of element is 11
+
 //        onRecyclerViewInteraction().check(withItemCount(favItemCount-1));
 //        onView(withContentDescription(R.string.tab_neighbour_title)).perform(click());
 //        onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT));

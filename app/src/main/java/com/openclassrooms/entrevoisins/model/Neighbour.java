@@ -51,17 +51,6 @@ public class Neighbour implements Serializable {
         this.isFavourite = false;
     }
 
-    public Neighbour(Neighbour neighbour) {
-        this.id = neighbour.id;
-        this.name = neighbour.name;
-        this.avatarUrl = neighbour.avatarUrl;
-        this.address = neighbour.address;
-        this.phoneNumber = neighbour.phoneNumber;
-        this.websiteUrl = neighbour.websiteUrl;
-        this.aboutMe = neighbour.aboutMe;
-        this.isFavourite = neighbour.isFavourite;
-    }
-
     public long getId() {
         return id;
     }
