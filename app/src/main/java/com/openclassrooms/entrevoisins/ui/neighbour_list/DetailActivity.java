@@ -2,16 +2,17 @@ package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.content.Intent;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+
 import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
 import com.openclassrooms.entrevoisins.model.Neighbour;
@@ -59,15 +60,15 @@ public class DetailActivity extends AppCompatActivity {
         initUi();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home : {
-                finish();
-                return true;
-            }
-        }
-        return super.onOptionsItemSelected(item);
+    /**
+     * Used to navigate to this activity
+     *
+     * @param activity activity that launches this one
+     */
+    public static void navigate(FragmentActivity activity, Neighbour neighbour) {
+        Intent intent = new Intent(activity, DetailActivity.class);
+        intent.putExtra(NEIGHBOUR_EXTRA, neighbour);
+        ActivityCompat.startActivity(activity, intent, null);
     }
 
     private void initUi() {
@@ -92,10 +93,12 @@ public class DetailActivity extends AppCompatActivity {
         mApiService.toggleFavourite(mNeighbour);
     }
 
-    /** Used to navigate to this activity */
-    public static void navigate(FragmentActivity activity, Neighbour neighbour) {
-        Intent intent = new Intent(activity, DetailActivity.class);
-        intent.putExtra(NEIGHBOUR_EXTRA, neighbour);
-        ActivityCompat.startActivity(activity, intent, null);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -8,17 +8,16 @@ import com.openclassrooms.entrevoisins.model.Neighbour;
 public class ShowNeighbourDetailEvent {
 
     /**
-     * Neighbour to delete
+     * Neighbour to show its information
      */
-    public Neighbour neighbour;
-    public int whichNeighbour;
-
+    public Neighbour mNeighbour;
     /**
-     * Constructor.
-     * @param neighbour
+     * Id of the fragment that displays the Neighbour
      */
+    public int mWhichNeighbour;
+
     public ShowNeighbourDetailEvent(Neighbour neighbour, int whichNeighbour) {
-        this.neighbour = neighbour;
-        this.whichNeighbour = whichNeighbour;
+        mNeighbour = neighbour;
+        mWhichNeighbour = whichNeighbour;
     }
 }

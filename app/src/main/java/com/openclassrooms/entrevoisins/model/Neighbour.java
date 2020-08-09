@@ -1,5 +1,7 @@
 package com.openclassrooms.entrevoisins.model;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.text.Normalizer;
 import java.util.Objects;
@@ -9,36 +11,39 @@ import java.util.Objects;
  */
 public class Neighbour implements Serializable {
 
-    /** Identifier */
+    /**
+     * Identifier
+     */
     private long id;
-
-    /** Full name */
+    /**
+     * Full name
+     */
     private String name;
-
-    /** Avatar */
+    /**
+     * Avatar
+     */
     private String avatarUrl;
-
-    /** Adress */
+    /**
+     * Adress
+     */
     private String address;
-
-    /** Phone number */
+    /**
+     * Phone number
+     */
     private String phoneNumber;
-
-    /** Website */
+    /**
+     * Website
+     */
     private String websiteUrl;
-
-    /** About me */
+    /**
+     * About me
+     */
     private String aboutMe;
-
-    /** Favourite or not */
+    /**
+     * Favourite or not
+     */
     private boolean isFavourite;
 
-    /**
-     * Constructor
-     * @param id
-     * @param name
-     * @param avatarUrl
-     */
     public Neighbour(long id, String name, String avatarUrl, String address,
                      String phoneNumber, String aboutMe) {
         this.id = id;
@@ -121,7 +126,7 @@ public class Neighbour implements Serializable {
      * to the beginning of the facebook website URL.
      *
      * @param name Name that is used to determine the end of the facebook website URL
-     * @return  The complete facebook website address
+     * @return The complete facebook website address
      */
     private String generateWebsiteFromName(String name) {
         String nameUrl = Normalizer.normalize(name, Normalizer.Form.NFD)
@@ -143,6 +148,7 @@ public class Neighbour implements Serializable {
         return Objects.hash(id);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "{" + name + ", " + isFavourite + '}';

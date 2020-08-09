@@ -1,13 +1,14 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
@@ -82,8 +83,7 @@ public class NeighbourFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
         ButterKnife.bind(this, view);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        mRecyclerView.setTag(mWhichNeighbours);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(view.getContext(), DividerItemDecoration.VERTICAL));
         return view;
     }
 
@@ -109,30 +109,9 @@ public class NeighbourFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        initList();
-    }
-
-//    @Override
-//    public void setUserVisibleHint(boolean isVisibleToUser) {
-//        // Lifecycle of a fragment inside a ViewPager can be tricky as it is not necessarily
-//        // destroyed if it is not visible anymore. Here, this fragment is used in both pages of the
-//        // ViewPager's adapter. Thus, if the fragments (un)register an EventBus in onStart() and
-//        // onStop(), when the user clicks on a Neighbour (which fires an event), then the
-//        // @Subscribe method is called twice as both fragments are aware of the event. This is why
-//        // the EventBus is (un)registered when the fragment becomes (in)visible to the user.
-//        super.setUserVisibleHint(isVisibleToUser);
-//        System.out.println("setUserVisibleHint");
-//        if (isVisibleToUser) {
-//            EventBus.getDefault().register(this);
-//        } else {
-//            EventBus.getDefault().unregister(this);
-//        }
-//    }
-    @Override
     public void onStart() {
         super.onStart();
+        initList();
         EventBus.getDefault().register(this);
     }
 
@@ -144,19 +123,20 @@ public class NeighbourFragment extends Fragment {
 
     /**
      * Fired if the user clicks on a delete button
-     * @param event
      */
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
         System.out.println("onDeleteNeighbour " + mWhichNeighbours);
-        if (event.whichNeighbour == mWhichNeighbours) {
-            switch (event.whichNeighbour) {
+        if (event.mWhichNeighbour == mWhichNeighbours) {
+            switch (event.mWhichNeighbour) {
                 case ALL_NEIGHBOURS:
-                    mApiService.deleteNeighbour(event.neighbour);
-                    EventBus.getDefault().post(new UpdateFavouriteListEvent());
+                    mApiService.deleteNeighbour(event.mNeighbour);
+                    // Sticky in case of the favourite fragment is not started yet (where EventBus is registered)
+                    // But using post() here gives the same result
+                    EventBus.getDefault().postSticky(new UpdateFavouriteListEvent());
                     break;
                 case FAVOURITE_NEIGHBOURS:
-                    mApiService.toggleFavourite(event.neighbour);
+                    mApiService.toggleFavourite(event.mNeighbour);
                     break;
             }
             initList();
@@ -165,21 +145,24 @@ public class NeighbourFragment extends Fragment {
 
     /**
      * Fired if the user clicks on a RecyclerView item
-     * @param event
      */
     @Subscribe
     public void onShowNeighbourDetail(ShowNeighbourDetailEvent event) {
-        if (event.whichNeighbour == mWhichNeighbours)
-            DetailActivity.navigate(getActivity(), event.neighbour);
+        System.out.println("onShowNeighbourDetail " + mWhichNeighbours);
+        if (event.mWhichNeighbour == mWhichNeighbours)
+            DetailActivity.navigate(getActivity(), event.mNeighbour);
     }
 
-    @Subscribe()
+    /**
+     * Fired if the favourite list needs to be updated
+     */
+    @Subscribe(sticky = true)
     public void onUpdateFavouriteList(UpdateFavouriteListEvent event) {
         System.out.println("onUpdateFavouriteList " + mWhichNeighbours);
         if (mWhichNeighbours == FAVOURITE_NEIGHBOURS) {
-            System.out.println("YES");
-
             initList();
+            System.out.println("favourite list has been updated");
+            EventBus.getDefault().removeStickyEvent(UpdateFavouriteListEvent.class);
         }
     }
 }

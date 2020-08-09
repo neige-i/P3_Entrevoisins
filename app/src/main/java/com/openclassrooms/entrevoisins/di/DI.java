@@ -11,16 +11,15 @@ public class DI {
     private static NeighbourApiService service = new DummyNeighbourApiService();
 
     /**
-     * Get an instance on @{@link NeighbourApiService}
-     * @return
+     * @return an instance on @{@link NeighbourApiService}
      */
     public static NeighbourApiService getNeighbourApiService() {
         return service;
     }
 
     /**
-     * Get always a new instance on @{@link NeighbourApiService}. Useful for tests, so we ensure the context is clean.
-     * @return
+     * @return always a new instance on @{@link NeighbourApiService}.
+     * Useful for tests, so we ensure the context is clean.
      */
     public static NeighbourApiService getNewInstanceApiService() {
         return new DummyNeighbourApiService();

@@ -6,4 +6,12 @@
     <string name="activity_new_neighbour">Nouveau voisin</string>
     <string name="about_me">À propos de moi</string>
     <string name="no_favourite_neighbour">Aucun voisin favoris</string>
+    <string name="name_hint">Nom</string>
+    <string name="phone_number_hint">Numéro de téléphone</string>
+    <string name="address_hint">Adresse</string>
+    <string name="save_button">Enregistrer</string>
+    <string name="avatar_description">avatar</string>
+    <string name="phone_description">Téléphone</string>
+    <string name="website_description">Site internet</string>
+    <string name="bin_descritption">Poubelle</string>
 </resources>

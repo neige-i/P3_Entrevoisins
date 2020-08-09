@@ -10,15 +10,14 @@ public class DeleteNeighbourEvent {
     /**
      * Neighbour to delete
      */
-    public Neighbour neighbour;
-    public int whichNeighbour;
-
+    public Neighbour mNeighbour;
     /**
-     * Constructor.
-     * @param neighbour
+     * Id of the fragment that displays the Neighbour
      */
+    public int mWhichNeighbour;
+
     public DeleteNeighbourEvent(Neighbour neighbour, int whichNeighbour) {
-        this.neighbour = neighbour;
-        this.whichNeighbour = whichNeighbour;
+        mNeighbour = neighbour;
+        mWhichNeighbour = whichNeighbour;
     }
 }
