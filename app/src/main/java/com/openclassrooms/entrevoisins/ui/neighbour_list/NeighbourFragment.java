@@ -1,11 +1,9 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.os.Bundle;
-import android.support.annotation.VisibleForTesting;
-import android.support.test.espresso.idling.CountingIdlingResource;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +13,13 @@ import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
 import com.openclassrooms.entrevoisins.events.DeleteNeighbourEvent;
 import com.openclassrooms.entrevoisins.events.ShowNeighbourDetailEvent;
+import com.openclassrooms.entrevoisins.events.UpdateFavouriteListEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -42,13 +40,7 @@ public class NeighbourFragment extends Fragment {
     /**
      * Key to set and retrieve the kind of neighbours this fragment will display.
      */
-    private static final String NEIGHBOUR_PARAM = "NEIGHBOUR_PARAM";
-//    /**
-//     * Static list containing all the instances of this class. This is used to access other instances
-//     * from another one. Here, the favourite list inside the {@link #FAVOURITE_NEIGHBOURS} fragment
-//     * can be updated from the {@link #ALL_NEIGHBOURS} fragment.
-//     */
-//    private static List<NeighbourFragment> FRAGMENT_LIST = new ArrayList<>();
+    private static final String NEIGHBOUR_PARAM = "neighbour";
 
     /**
      * Represents which neighbours to display in the {@link RecyclerView}.
@@ -58,9 +50,6 @@ public class NeighbourFragment extends Fragment {
 
     private NeighbourApiService mApiService;
     private List<Neighbour> mNeighbours;
-
-    @VisibleForTesting
-    private CountingIdlingResource mCountingIdlingResource;
 
     @BindView(R.id.list_neighbours)
     RecyclerView mRecyclerView;
@@ -78,7 +67,6 @@ public class NeighbourFragment extends Fragment {
         Bundle args = new Bundle();
         args.putInt(NEIGHBOUR_PARAM, whichNeighbours);
         fragment.setArguments(args);
-//        FRAGMENT_LIST.add(fragment);
         return fragment;
     }
 
@@ -95,8 +83,7 @@ public class NeighbourFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
         ButterKnife.bind(this, view);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-
-        mCountingIdlingResource = new CountingIdlingResource("RecyclerView refresh");
+        mRecyclerView.setTag(mWhichNeighbours);
         return view;
     }
 
@@ -104,11 +91,12 @@ public class NeighbourFragment extends Fragment {
      * Init the List of neighbours
      */
     private void initList() {
+        System.out.println("initList " + mWhichNeighbours);
         switch (mWhichNeighbours) {
             case ALL_NEIGHBOURS:        mNeighbours = mApiService.getNeighbours();      break;
             case FAVOURITE_NEIGHBOURS:  mNeighbours = mApiService.getFavNeighbours();   break;
         }
-        mRecyclerView.setAdapter(new MyNeighbourRecyclerViewAdapter(mNeighbours));
+        mRecyclerView.setAdapter(new MyNeighbourRecyclerViewAdapter(mNeighbours, mWhichNeighbours));
         updateTextVisibility();
     }
 
@@ -126,20 +114,32 @@ public class NeighbourFragment extends Fragment {
         initList();
     }
 
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        // Lifecycle of a fragment inside a ViewPager can be tricky as it is not necessarily
+//        // destroyed if it is not visible anymore. Here, this fragment is used in both pages of the
+//        // ViewPager's adapter. Thus, if the fragments (un)register an EventBus in onStart() and
+//        // onStop(), when the user clicks on a Neighbour (which fires an event), then the
+//        // @Subscribe method is called twice as both fragments are aware of the event. This is why
+//        // the EventBus is (un)registered when the fragment becomes (in)visible to the user.
+//        super.setUserVisibleHint(isVisibleToUser);
+//        System.out.println("setUserVisibleHint");
+//        if (isVisibleToUser) {
+//            EventBus.getDefault().register(this);
+//        } else {
+//            EventBus.getDefault().unregister(this);
+//        }
+//    }
     @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        // Lifecycle of a fragment inside a ViewPager can be tricky as it is not necessarily
-        // destroyed if it is not visible anymore. Here, this fragment is used in both pages of the
-        // ViewPager's adapter. Thus, if the fragments (un)register an EventBus in onStart() and
-        // onStop(), when the user clicks on a Neighbour (which fires an event), then the
-        // @Subscribe method is called twice as both fragments are aware of the event. This is why
-        // the EventBus is (un)registered when the fragment becomes (in)visible to the user.
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            EventBus.getDefault().register(this);
-        } else {
-            EventBus.getDefault().unregister(this);
-        }
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     /**
@@ -149,18 +149,18 @@ public class NeighbourFragment extends Fragment {
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
         System.out.println("onDeleteNeighbour " + mWhichNeighbours);
-//        switch (mWhichNeighbours) {
-//            case ALL_NEIGHBOURS:
-//                mApiService.deleteNeighbour(event.neighbour);
-////                FRAGMENT_LIST.get(FAVOURITE_NEIGHBOURS).initList();
-//                break;
-//            case FAVOURITE_NEIGHBOURS:
-//                mApiService.toggleFavourite(event.neighbour);
-//                break;
-//        }
-//        mCountingIdlingResource.increment();
-//        initList();
-//        mCountingIdlingResource.decrement();
+        if (event.whichNeighbour == mWhichNeighbours) {
+            switch (event.whichNeighbour) {
+                case ALL_NEIGHBOURS:
+                    mApiService.deleteNeighbour(event.neighbour);
+                    EventBus.getDefault().post(new UpdateFavouriteListEvent());
+                    break;
+                case FAVOURITE_NEIGHBOURS:
+                    mApiService.toggleFavourite(event.neighbour);
+                    break;
+            }
+            initList();
+        }
     }
 
     /**
@@ -169,11 +169,17 @@ public class NeighbourFragment extends Fragment {
      */
     @Subscribe
     public void onShowNeighbourDetail(ShowNeighbourDetailEvent event) {
-        System.out.println("onShowNeighbourDetail " + mWhichNeighbours);
-        DetailActivity.navigate(getActivity(), event.neighbour);
+        if (event.whichNeighbour == mWhichNeighbours)
+            DetailActivity.navigate(getActivity(), event.neighbour);
     }
 
-    public CountingIdlingResource getCountingIdlingResource() {
-        return mCountingIdlingResource;
+    @Subscribe()
+    public void onUpdateFavouriteList(UpdateFavouriteListEvent event) {
+        System.out.println("onUpdateFavouriteList " + mWhichNeighbours);
+        if (mWhichNeighbours == FAVOURITE_NEIGHBOURS) {
+            System.out.println("YES");
+
+            initList();
+        }
     }
 }

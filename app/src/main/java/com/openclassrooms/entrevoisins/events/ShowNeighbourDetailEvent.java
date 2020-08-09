@@ -11,12 +11,14 @@ public class ShowNeighbourDetailEvent {
      * Neighbour to delete
      */
     public Neighbour neighbour;
+    public int whichNeighbour;
 
     /**
      * Constructor.
      * @param neighbour
      */
-    public ShowNeighbourDetailEvent(Neighbour neighbour) {
+    public ShowNeighbourDetailEvent(Neighbour neighbour, int whichNeighbour) {
         this.neighbour = neighbour;
+        this.whichNeighbour = whichNeighbour;
     }
 }
