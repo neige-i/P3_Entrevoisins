@@ -34,6 +34,7 @@
             android:background="?attr/colorPrimary"
             app:tabIndicatorHeight="3dp"
             app:tabSelectedTextColor="@android:color/white"
+            app:tabIndicatorColor="@color/colorAccent"
             >
 
             <com.google.android.material.tabs.TabItem

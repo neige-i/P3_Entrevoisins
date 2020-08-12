@@ -6,7 +6,7 @@ import androidx.test.espresso.intent.rule.IntentsTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.openclassrooms.entrevoisins.R;
-import com.openclassrooms.entrevoisins.ui.neighbour_list.DetailActivity;
+import com.openclassrooms.entrevoisins.ui.neighbour_detail.DetailActivity;
 import com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity;
 import com.openclassrooms.entrevoisins.utils.DeleteViewAction;
 
@@ -68,11 +68,11 @@ public class NeighboursListTest {
      */
     @Test
     public void myNeighboursList_deleteAction_shouldRemoveItem() {
-        // Given : We remove the element at position 2
+        // Given: we remove the element at position 2
         onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT));
-        // When perform a click on a delete icon
+        // When: perform a click on a delete icon
         onRecyclerViewInteraction().perform(RecyclerViewActions.actionOnItemAtPosition(1, new DeleteViewAction()));
-        // Then : the number of element is 11
+        // Then: the number of element is 11
         onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT - 1));
     }
 
@@ -80,9 +80,12 @@ public class NeighboursListTest {
      * When we click on a RecyclerView item, DetailActivity is launched
      */
     @Test
-    public void detailActivity_shouldLaunched() {
-        // Arbitrary position (but must be between 0 and 11)
-        onRecyclerViewInteraction().perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+    public void detailActivity_shouldBeLaunched() {
+        // Given: we want to see the details of the first element
+        int position = 0;
+        // When: we click on the item of the list
+        onRecyclerViewInteraction().perform(RecyclerViewActions.actionOnItemAtPosition(position, click()));
+        // Then: the DetailActivity is launched
         intended(hasComponent(DetailActivity.class.getName()));
     }
 
@@ -91,12 +94,11 @@ public class NeighboursListTest {
      */
     @Test
     public void textView_shouldContainName() {
+        // Given: we want to see the detail of a neighbour whose name is Caroline
         String neighbourName = "Caroline";
-        // Perform a click on the item of the list with the given name
+        // When: we click on the appropriate item of the list
         onRecyclerViewInteraction().perform(RecyclerViewActions.actionOnItem(hasDescendant(withText(neighbourName)), click()));
-        // The detail screen is displayed
-        intended(hasComponent(DetailActivity.class.getName()));
-        // The TextView displaying the neighbour's name should be the same as the given one
+        // Then: the TextView displays the given name
         onView(withId(R.id.name)).check(matches(withText(neighbourName)));
     }
 
@@ -105,15 +107,17 @@ public class NeighboursListTest {
      */
     @Test
     public void favouriteTab_shouldDisplayFavouriteOnly() {
+        // Given: there isn't any favourite neighbour
         int none = 0;
-        // Scroll the ViewPager to the right to show the favourite neighbours
+
+        // When: we scroll the ViewPager to show the favourite list
         onView(withId(R.id.container)).perform(swipeLeft());
-        // As no favourite has been set, the favourite list should be empty
+        // Then: the list is empty
         onRecyclerViewInteraction().check(withItemCount(none));
 
-        // Set a favourite neighbour
+        // When: we set a favourite neighbour
         setFavourite();
-        // Now, the favourite list should contain an extra element
+        // Then: the favourite list contains an extra element
         onRecyclerViewInteraction().check(withItemCount(none + 1));
     }
 
@@ -123,20 +127,23 @@ public class NeighboursListTest {
      */
     @Test
     public void myFavouriteList_deleteAction_shouldRemoveItem() {
+        // Given: we remove the only favourite neighbour
         int favItemCount = 1;
         onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT));
 
-        // Set a favourite neighbour and check that the favourite list's size equals 1
+        // When: we set a favourite neighbour
         setFavourite();
+        // Then: the favourite list contains 1 element
         onRecyclerViewInteraction().check(withItemCount(favItemCount));
 
-        // Perform a click on a delete icon
+        // When: we click on the delete icon
         onRecyclerViewInteraction().perform(RecyclerViewActions.actionOnItemAtPosition(0, new DeleteViewAction()));
-        // The favourite list's size should have been decreased by 1
+        // Then: the favourite list is empty
         onRecyclerViewInteraction().check(withItemCount(favItemCount - 1));
-        // Return to the 'all neighbours' tab
+
+        // When: we return to the 'all neighbours' tab
         onView(withContentDescription(R.string.tab_neighbour_title)).perform(click());
-        // The main list should remain the same
+        // Then: the main list remains the same
         onRecyclerViewInteraction().check(withItemCount(ITEMS_COUNT));
     }
 

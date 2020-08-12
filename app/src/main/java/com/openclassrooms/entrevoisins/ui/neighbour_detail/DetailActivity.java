@@ -1,4 +1,4 @@
-package com.openclassrooms.entrevoisins.ui.neighbour_list;
+package com.openclassrooms.entrevoisins.ui.neighbour_detail;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +24,7 @@ import butterknife.OnClick;
 
 public class DetailActivity extends AppCompatActivity {
 
+    private static final String NEIGHBOUR_EXTRA = "NEIGHBOUR_EXTRA";
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
     @BindView(R.id.avatar)
@@ -40,11 +41,19 @@ public class DetailActivity extends AppCompatActivity {
     TextView mAboutMe;
     @BindView(R.id.favourite)
     FloatingActionButton mFavourite;
-
-    private static final String NEIGHBOUR_EXTRA = "NEIGHBOUR_EXTRA";
-
     private NeighbourApiService mApiService;
     private Neighbour mNeighbour;
+
+    /**
+     * Used to navigate to this activity
+     *
+     * @param activity activity that launches this one
+     */
+    public static void navigate(FragmentActivity activity, Neighbour neighbour) {
+        Intent intent = new Intent(activity, DetailActivity.class);
+        intent.putExtra(NEIGHBOUR_EXTRA, neighbour);
+        ActivityCompat.startActivity(activity, intent, null);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,17 +67,6 @@ public class DetailActivity extends AppCompatActivity {
 
         mNeighbour = (Neighbour) getIntent().getSerializableExtra(NEIGHBOUR_EXTRA);
         initUi();
-    }
-
-    /**
-     * Used to navigate to this activity
-     *
-     * @param activity activity that launches this one
-     */
-    public static void navigate(FragmentActivity activity, Neighbour neighbour) {
-        Intent intent = new Intent(activity, DetailActivity.class);
-        intent.putExtra(NEIGHBOUR_EXTRA, neighbour);
-        ActivityCompat.startActivity(activity, intent, null);
     }
 
     private void initUi() {

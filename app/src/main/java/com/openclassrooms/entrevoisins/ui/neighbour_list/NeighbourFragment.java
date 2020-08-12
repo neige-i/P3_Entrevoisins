@@ -17,6 +17,7 @@ import com.openclassrooms.entrevoisins.events.ShowNeighbourDetailEvent;
 import com.openclassrooms.entrevoisins.events.UpdateFavouriteListEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
+import com.openclassrooms.entrevoisins.ui.neighbour_detail.DetailActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
